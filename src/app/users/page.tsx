@@ -25,10 +25,11 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { red } from "@mui/material/colors";
-import Dialog from "../components/dialog";
-import CustomDialog from "../components/dialog";
 import { getUserData } from "../services/users";
 import { Button, Col, Row } from "react-bootstrap";
+import dynamic from "next/dynamic";
+import ConfirmationPopup from "../components/confirmationPopup";
+import CustomDialog from "../components/customDialog";
 
 type Order = "asc" | "desc";
 
@@ -156,43 +157,38 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
   const { numSelected } = props;
+  const [isAddNewUserPopup, setIsAddNewUserPopup] = useState(false);
+
+
+  const CustomDialog = dynamic(() => import('../components/customDialog'), {
+    ssr: false,
+  });
+
+   const openAddUserDialog = () => {
+    setIsAddNewUserPopup(true);
+    Users();
+  }
+
+  const closeAddUserPopup = () => {
+    debugger;
+    setIsAddNewUserPopup(false);
+  }
+
   return (
-    // <Toolbar
-    //   sx={[
-    //     {
-    //       pl: { sm: 2 },
-    //       pr: { xs: 1, sm: 1 },
-    //     },
-    //     numSelected > 0 && {
-    //       bgcolor: (theme) =>
-    //         alpha(
-    //           theme.palette.primary.main,
-    //           theme.palette.action.activatedOpacity
-    //         ),
-    //     },
-    //   ]}
-    // >
-    //   <Typography
-    //     sx={{ flex: "1 1 100%" }}
-    //     variant="h6"
-    //     id="tableTitle"
-    //     component="div"
-    //   >
-    //     Users
-    //   </Typography>
-    // </Toolbar>
     <>
       <Row>
         <Col xs={6}>
             <div className="table-title ">Users</div>
         </Col>
         <Col xs={6} className="mt-2 text-end pt-1">
-            <Button className="me-4">Add User</Button>
+            <Button className="me-4" onClick={ openAddUserDialog}>Add User</Button>
         </Col>
       </Row>
       <Divider />
+      <CustomDialog isOpen={isAddNewUserPopup} closePopup={closeAddUserPopup} isEdit={false}></CustomDialog>
     </>
   );
+
 }
 
 function getComparator<Key extends keyof any>(
@@ -223,26 +219,62 @@ function Users() {
   const [dense, setDense] = React.useState(false);
   const [rowPerPage, setRowPerPage] = React.useState(5);
   const [selectedUser, setSelectedUser] = React.useState<UserType>();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditUserPopup, setIsEditUserPopup] = useState(false);
+  const [openDeleteUserPopup, setOpenDeleteUserPopup] = useState(false);
+
 
   useEffect(() => {
-      const fetchData = async () => {
-        const data = await getUserData();
-        setUserList(data);
-      };
       fetchData();
   }, []);
-  
 
+  const fetchData = async () => {
+    const data = await getUserData();
+    setUserList(data);
+  };
+      
+  
 
   const openDialog = (user: UserType) => {
     setSelectedUser(user);
-    setIsDialogOpen(true);
+    setIsEditUserPopup(true);
   };
 
+  const deleteUser = async (user : UserType) => {
+    try{
+      const response = await fetch(`http://localhost:3002/users/${user._id}`, {
+        method: 'DELETE',
+         headers: {
+            "Content-Type": "application/json",
+          }
+      })
+      if(response.ok){
+        setOpenDeleteUserPopup(false);
+      }else{
+        const errorText = await response.text();
+      }
+      fetchData();
+    }catch(err){
+      console.error('Failed to delete user: ', err)
+    }
+  }
+
+  
+  const deleteActionButton = {
+    userAction: () => {
+      if(selectedUser){
+        deleteUser(selectedUser);
+      }
+    },
+    buttonTitle: 'Delete',
+    description: 'Are you sure you want to delete this user ?',
+  }
+
   const closeDialog = () => {
-    setIsDialogOpen(false);
+    setIsEditUserPopup(false);
+    fetchData();
   };
+
+  
 
 
   const handleRequestSort = (
@@ -314,6 +346,16 @@ function Users() {
     [userList, order, orderBy, page, rowPerPage]
   );
 
+  const openDeletePopup = (user: UserType) => {
+    setOpenDeleteUserPopup(true);
+    setSelectedUser(user);
+  }
+
+  const closeDeletePopup =() => {
+    setOpenDeleteUserPopup(false);
+    setSelectedUser(undefined);
+  }
+
 
   return (
    <>
@@ -336,13 +378,13 @@ function Users() {
             />
             <TableBody>
               {visibleRows.map((row, index) => {
-                const isItemSelected = selected.includes(row._id);
+                const isItemSelected = selected.includes(row?._id);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => handleClick(event, row._id)}
+                    onClick={(event) => handleClick(event, row?._id)}
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
@@ -368,7 +410,7 @@ function Users() {
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <VisibilityIcon fontSize="small" color="primary" className="icon m-1 border-primary"/>  
                       <EditIcon fontSize="small" color="success" className="icon m-1 border-success" onClick={() => openDialog(row)}/>
-                      <DeleteIcon fontSize="small" sx={{ color: red[500] }} className="icon m-1 border-danger" />  
+                      <DeleteIcon fontSize="small" sx={{ color: red[500] }} className="icon m-1 border-danger" onClick={() => openDeletePopup(row)}/>  
                     </TableCell>
                   </TableRow>
                 );
@@ -389,8 +431,9 @@ function Users() {
         {/* <FormControlLabel control={<Switch checked={dense} onChange={handleDenseChange } /> } label="Dense padding" /> */}
     </Box>
 
-      <CustomDialog isOpen={isDialogOpen} onClose={closeDialog} selectedUser={selectedUser} ></CustomDialog>
+      <CustomDialog isOpen={isEditUserPopup} closePopup={closeDialog} selectedUser={selectedUser} isEdit={true}></CustomDialog>
 
+      <ConfirmationPopup isOpen={openDeleteUserPopup}  submitButton={deleteActionButton} selectedUser={selectedUser} closePopup={closeDeletePopup}></ConfirmationPopup>
     </>
   );
 }
