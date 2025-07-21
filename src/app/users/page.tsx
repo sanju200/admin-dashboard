@@ -55,6 +55,7 @@ interface HeadCell {
 
 interface EnhancedTableToolbarProps {
   numSelected: number;
+  onUserAdded: () => void;
 }
 
 
@@ -155,8 +156,9 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
-  const { numSelected } = props;
+function EnhancedTableToolbar({numSelected, onUserAdded }: EnhancedTableToolbarProps, ) {
+  debugger;
+  // const { numSelected } = props;
   const [isAddNewUserPopup, setIsAddNewUserPopup] = useState(false);
 
 
@@ -166,7 +168,6 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
 
    const openAddUserDialog = () => {
     setIsAddNewUserPopup(true);
-    Users();
   }
 
   const closeAddUserPopup = () => {
@@ -185,7 +186,7 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
         </Col>
       </Row>
       <Divider />
-      <CustomDialog isOpen={isAddNewUserPopup} closePopup={closeAddUserPopup} isEdit={false}></CustomDialog>
+      <CustomDialog isOpen={isAddNewUserPopup} closePopup={closeAddUserPopup} onSaved={onUserAdded} isEdit={false} ></CustomDialog>
     </>
   );
 
@@ -361,7 +362,7 @@ function Users() {
    <>
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar numSelected={selected.length} onUserAdded={fetchData}/>
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
@@ -431,7 +432,7 @@ function Users() {
         {/* <FormControlLabel control={<Switch checked={dense} onChange={handleDenseChange } /> } label="Dense padding" /> */}
     </Box>
 
-      <CustomDialog isOpen={isEditUserPopup} closePopup={closeDialog} selectedUser={selectedUser} isEdit={true}></CustomDialog>
+      <CustomDialog isOpen={isEditUserPopup} closePopup={closeDialog} selectedUser={selectedUser} isEdit={true} onSaved={fetchData}></CustomDialog>
 
       <ConfirmationPopup isOpen={openDeleteUserPopup}  submitButton={deleteActionButton} selectedUser={selectedUser} closePopup={closeDeletePopup}></ConfirmationPopup>
     </>

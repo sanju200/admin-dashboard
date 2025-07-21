@@ -19,9 +19,10 @@ type DialogProp = {
     selectedUser?: UserType | undefined,
     closePopup: (event: React.ChangeEvent<HTMLInputElement>) => void;
     isEdit: boolean,
+    onSaved: () => void;
 }
 
-function CustomDialog({ isOpen, selectedUser, closePopup, isEdit = false }: DialogProp ) {
+function CustomDialog({ isOpen, selectedUser, closePopup, isEdit = false, onSaved }: DialogProp ) {
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
     let [checked, setChecked] = React.useState(false);
@@ -71,9 +72,11 @@ function CustomDialog({ isOpen, selectedUser, closePopup, isEdit = false }: Dial
         if (response.ok) {
           alert("User updated successfully");
           closePopup({} as any);
+          onSaved();
         } else {
           alert("Failed to update user");
         }
+      
       } catch (error) {
         console.error("Update error:", error);
         alert("Error updating user");
@@ -91,6 +94,7 @@ function CustomDialog({ isOpen, selectedUser, closePopup, isEdit = false }: Dial
         if(response.ok){
           alert('User added successfully');
           closePopup({} as any);
+          onSaved();
         }else{
           alert('Failed to add user');
         }
