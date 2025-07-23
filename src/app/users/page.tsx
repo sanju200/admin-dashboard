@@ -157,7 +157,6 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 function EnhancedTableToolbar({numSelected, onUserAdded }: EnhancedTableToolbarProps, ) {
-  debugger;
   // const { numSelected } = props;
   const [isAddNewUserPopup, setIsAddNewUserPopup] = useState(false);
 
@@ -212,7 +211,7 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
 }
 
 function Users() {
-  const [userList, setUserList] = useState<>([]);
+  const [userList, setUserList] = useState<UserType[]>([]);
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<keyof UserType>("_id");
   const [selected, setSelected] = React.useState<readonly string[]>([]);

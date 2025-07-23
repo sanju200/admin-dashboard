@@ -29,7 +29,7 @@ import { useRouter } from "next/navigation";
 import PropTypes from 'prop-types';
 import Navbar from "./navbar";
 import About from "../about/page";
-import Data from "../data/page";
+import Productdata from "../productdata/page";
 import Users from "../users/page";
 import Setting from "../setting/page";
 
@@ -104,7 +104,7 @@ function Layout(props: { window?: any; children?: any; }) {
   const menuItem = [
     { title: "Dashboard", icon: <AvTimerIcon />, url: "/" },
     { title: "Users", icon: <PeopleIcon />, url: "/users" },
-    { title: "Data", icon: <ListAltIcon />, url: "/data" },
+    { title: "Product Data", icon: <ListAltIcon />, url: "/productdata" },
     { title: "Setting", icon: <SettingsIcon />, url: "/setting" },
     { title: "About", icon: <InfoOutlineIcon />, url: "/about" },
   ];
@@ -117,8 +117,8 @@ function Layout(props: { window?: any; children?: any; }) {
         return <Setting />;
       case '/about':
         return <About />
-      case '/data':
-        return <Data />
+      case '/productdata':
+        return <Productdata />
       case '/users':
         return <Users />
       default:

@@ -56,7 +56,6 @@ function CustomDialog({ isOpen, selectedUser, closePopup, isEdit = false, onSave
     };
 
     const handleSubmit = async () => {
-      console.log('formData ', formData);
       const setStatus = formData?.status ? formData?.status : 'inactive';
       formData = {...formData, status: setStatus}
      if(isEdit){
