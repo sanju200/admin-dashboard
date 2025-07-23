@@ -30,6 +30,7 @@ import { Button, Col, Row } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import ConfirmationPopup from "../components/confirmationPopup";
 import CustomDialog from "../components/customDialog";
+import Userdetails from "../components/userdetails";
 
 type Order = "asc" | "desc";
 
@@ -170,7 +171,6 @@ function EnhancedTableToolbar({numSelected, onUserAdded }: EnhancedTableToolbarP
   }
 
   const closeAddUserPopup = () => {
-    debugger;
     setIsAddNewUserPopup(false);
   }
 
@@ -221,6 +221,7 @@ function Users() {
   const [selectedUser, setSelectedUser] = React.useState<UserType>();
   const [isEditUserPopup, setIsEditUserPopup] = useState(false);
   const [openDeleteUserPopup, setOpenDeleteUserPopup] = useState(false);
+  const [showUserDetails , setShowUserDetails] = useState<boolean>(false);
 
 
   useEffect(() => {
@@ -231,8 +232,6 @@ function Users() {
     const data = await getUserData();
     setUserList(data);
   };
-      
-  
 
   const openDialog = (user: UserType) => {
     setSelectedUser(user);
@@ -257,7 +256,6 @@ function Users() {
       console.error('Failed to delete user: ', err)
     }
   }
-
   
   const deleteActionButton = {
     userAction: () => {
@@ -274,9 +272,6 @@ function Users() {
     fetchData();
   };
 
-  
-
-
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
     property: keyof UserType
@@ -290,7 +285,7 @@ function Users() {
  const handleSelectAllClick = useCallback(
   (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newRowSelected = userList.map((user) => user._id);
+      const newRowSelected = userList?.map((user) => user._id);
       setSelected(newRowSelected);
     } else {
       setSelected([]);
@@ -356,6 +351,15 @@ function Users() {
     setSelectedUser(undefined);
   }
 
+  const openViewUserPopup = (user: UserType) => {
+    setShowUserDetails(true);
+    setSelectedUser(user);
+  }
+
+  const closeUserDetailsPopup = () => {
+    setShowUserDetails(false);
+     setSelectedUser(undefined);
+  }
 
   return (
    <>
@@ -377,7 +381,7 @@ function Users() {
               rowCount={userList.length}
             />
             <TableBody>
-              {visibleRows.map((row, index) => {
+              { visibleRows && visibleRows.map((row, index) => {
                 const isItemSelected = selected.includes(row?._id);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -408,7 +412,7 @@ function Users() {
                     <TableCell>{row.dob}</TableCell>
                     <TableCell>{row.status}</TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
-                      <VisibilityIcon fontSize="small" color="primary" className="icon m-1 border-primary"/>  
+                      <VisibilityIcon fontSize="small" color="primary" className="icon m-1 border-primary" onClick={() => openViewUserPopup(row)} />  
                       <EditIcon fontSize="small" color="success" className="icon m-1 border-success" onClick={() => openDialog(row)}/>
                       <DeleteIcon fontSize="small" sx={{ color: red[500] }} className="icon m-1 border-danger" onClick={() => openDeletePopup(row)}/>  
                     </TableCell>
@@ -434,6 +438,8 @@ function Users() {
       <CustomDialog isOpen={isEditUserPopup} closePopup={closeDialog} selectedUser={selectedUser} isEdit={true} onSaved={fetchData}></CustomDialog>
 
       <ConfirmationPopup isOpen={openDeleteUserPopup}  submitButton={deleteActionButton} selectedUser={selectedUser} closePopup={closeDeletePopup}></ConfirmationPopup>
+
+      <Userdetails isOpen={showUserDetails} selectedUser={selectedUser} closePopup={closeUserDetailsPopup}></Userdetails>
     </>
   );
 }

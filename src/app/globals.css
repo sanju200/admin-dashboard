@@ -52,3 +52,16 @@ hr{
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
+.badge{
+  font-size: 14px !important;
+  padding: 2px 5px;
+  border-radius: 2rem;
+}
+.badge-sucess{
+  color: #15803d !important;
+  background: #dcfce7;
+}
+.badge-danger{
+  color: #b91c1c !important;
+  background: #fee2e2;
+}

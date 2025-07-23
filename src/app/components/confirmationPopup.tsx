@@ -29,7 +29,7 @@ function ConfirmationPopup({ isOpen, closePopup, selectedUser, submitButton }: C
       >
         {/* <DialogTitle>Optional sizes</DialogTitle> */}
         <DialogContent>
-          <DialogContentText className=''>
+          <DialogContentText className='text-black fs-5'>
             { submitButton.description }
           </DialogContentText>
           <Box

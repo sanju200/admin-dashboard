@@ -12,27 +12,64 @@ import ContinuousModel from "echarts/types/src/component/visualMap/ContinuousMod
 
 function Userdata() {
   const[averageRatingData, setAverageRatingData] = useState<AverageRatingType[]>();
+  const [barChartOption, setBarChartOption] = useState<EChartsOption>({
+    title: {
+    text: 'Product Rating Chart',
+  },
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      type: 'shadow'
+    }
+  },
+    xAxis: { type: "category", data: [] },
+    yAxis: { type: "value" },
+    series: [],
+  });
 
-  useEffect(() => {
-        fetchRatingData();
-        handleBarChartData();
-      }, []); 
+    useEffect(() => {
+      const fetchData = async () => {
+        const data = await getAverageRatingData();
+        console.log('AverageRatingData ', data)
+        setAverageRatingData(data);
+      };
+      fetchData();
+  }, []);
 
-  const fetchRatingData = async () => {
-    const data = getAverageRatingData();
-    setAverageRatingData(data);
-    console.log('Data ', averageRatingData);
-  }
+  useEffect (() => {
+     handleBarChartData();
+  }, [averageRatingData] )
 
-  const handleBarChartData = async () => {
-    await averageRatingData?.map((item) => {
-      return{
-        name: item.title,
-        value: item.averageRating
-      }
-    });
-    console.log('averageRatingData', averageRatingData);
-  }
+  const handleBarChartData = () => {
+  if (!averageRatingData || averageRatingData.length === 0) return;
+
+  const titles = averageRatingData.map(item => item.title);
+  const ratings = averageRatingData.map(item => item.averageRating);
+
+  const newOption: EChartsOption = {
+    tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
+    grid: { left: "3%", right: "4%", bottom: "3%", containLabel: true },
+    xAxis: [
+      {
+        type: "category",
+        data: titles,
+        axisTick: { alignWithLabel: true },
+      },
+    ],
+    yAxis: { type: "value" },
+    series: [
+      {
+        name: "Avg Rating",
+        type: "bar",
+        barWidth: "60%",
+        data: ratings,
+      },
+    ],
+  };
+
+  setBarChartOption(newOption);
+};
+
 
   const [pieChartOption, setPieChartOption] = useState<EChartsOption>({
     title: {
@@ -68,20 +105,6 @@ function Userdata() {
     xAxis: { type: "category", data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
     yAxis: { type: "value" },
     series: [{ data: [150, 230, 224, 218, 135, 147, 260], type: "line" }],
-  };
-
-  const barChartOption: EChartsOption = {
-    tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
-    grid: { left: "3%", right: "4%", bottom: "3%", containLabel: true },
-    xAxis: [
-      {
-        type: "category",
-        data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-        axisTick: { alignWithLabel: true },
-      },
-    ],
-    yAxis: { type: "value" },
-    series: [{ name: "Direct", type: "bar", barWidth: "60%", data: [10, 52, 200, 334, 390, 330, 220] }],
   };
 
   const scatterChartOption: EChartsOption = {

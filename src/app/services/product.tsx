@@ -20,6 +20,5 @@ export async function getRatingsData(): Promise<RatingType[]>{
 export async function getAverageRatingData(): Promise<AverageRatingType[]>{
     const response = await fetch(`${APIPATH}/${API_ENDPOINTS.AVERAGERATINGS}`);
     const data = await response.json();
-    console.log('Average rating data ', data);
     return data;
 }

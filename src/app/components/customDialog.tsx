@@ -11,7 +11,6 @@ import {
 import React, { useEffect, useState } from "react";
 import { UserType } from "../interface/userType";
 import { Row, Col } from "react-bootstrap";
-import { FormControl, FormHelperText, Input, InputLabel } from "@mui/material";
 import Switch from "@mui/material/Switch";
 
 type DialogProp = {
