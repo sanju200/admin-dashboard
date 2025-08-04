@@ -12,10 +12,11 @@ import React, { useEffect, useState } from "react";
 import { UserType } from "../interface/userType";
 import { Row, Col } from "react-bootstrap";
 import Switch from "@mui/material/Switch";
+import { createUser, updateUserData } from "../services/users";
 
 type DialogProp = {
     isOpen: boolean,
-    selectedUser?: UserType | undefined,
+    selectedUser?: UserType,
     closePopup: (event: React.ChangeEvent<HTMLInputElement>) => void;
     isEdit: boolean,
     onSaved: () => void;
@@ -25,22 +26,31 @@ function CustomDialog({ isOpen, selectedUser, closePopup, isEdit = false, onSave
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
     let [checked, setChecked] = React.useState(false);
-
-    let [formData, setFormData] = useState<UserType | undefined>();
+    let [userRole, setUserRole ] = useState<String>("customer")
+    let [formData, setFormData] = useState<UserType>({
+      _id: selectedUser ? selectedUser._id : "",
+      firstname: "",
+      lastname: "",
+      email: "",
+      phone: "",
+      address: "",
+      dob: Date(),
+      status: "",
+      role: ""
+    });
     
-
     useEffect(() => {
       if (selectedUser) {
         setFormData(selectedUser);
         setChecked(selectedUser.status === 'active');
+        setUserRole(selectedUser.role);
       }
     }, [selectedUser]);
 
-    const handleUserForm = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleUserForm = (event: React.ChangeEvent<HTMLInputElement>) => {
       setFormData({
         ...formData,
-
-        [e.target.name]: e.target.value,
+        [event.target.name]: event.target.value,
       } as UserType);
     };
 
@@ -51,6 +61,7 @@ function CustomDialog({ isOpen, selectedUser, closePopup, isEdit = false, onSave
       setFormData({
         ...formData,
         status: newStatus,
+        role: userRole
       } as UserType);
     };
 
@@ -58,49 +69,24 @@ function CustomDialog({ isOpen, selectedUser, closePopup, isEdit = false, onSave
       const setStatus = formData?.status ? formData?.status : 'inactive';
       formData = {...formData, status: setStatus}
      if(isEdit){
-       try {
-        const response = await fetch(`http://localhost:3002/users/${formData?._id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        });
-
-        if (response.ok) {
-          alert("User updated successfully");
+       const response = await updateUserData(formData);
+       if(response){
+          alert('User updated successfully');
           closePopup({} as any);
           onSaved();
-        } else {
-          alert("Failed to update user");
+        }else{
+          alert('Failed to update the user');
         }
-      
-      } catch (error) {
-        console.error("Update error:", error);
-        alert("Error updating user");
-      }
      }else{
-      try{
-        const response = await fetch('http://localhost:3002/users', {
-          method: 'POST',
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        })
-
-        if(response.ok){
+        const response = await createUser(formData);
+        if(response){
           alert('User added successfully');
           closePopup({} as any);
           onSaved();
         }else{
-          alert('Failed to add user');
+          alert('Failed to add the user');
         }
-      }catch(err){
-        console.error('Create user error: ', err);
-        alert("Error while creating user");
       }
-     }
     };
 
 
@@ -138,8 +124,8 @@ function CustomDialog({ isOpen, selectedUser, closePopup, isEdit = false, onSave
                   type="text"
                   placeholder="John"
                   name="firstname"
-                  value={formData?.firstname || ""}
-                  onChange={handleUserForm}
+                  value={formData?.firstname ? formData?.firstname : ""}
+                  onChange={(event) => handleUserForm(event)}
                   className="form-field"
                 />
             </Col>
@@ -149,8 +135,8 @@ function CustomDialog({ isOpen, selectedUser, closePopup, isEdit = false, onSave
                 type="text"
                 placeholder="Doe"
                 name="lastname"
-                value={formData?.lastname || ""}
-                  onChange={handleUserForm}
+                value={formData?.lastname ? formData?.lastname : ""}
+                onChange={(event) => handleUserForm(event)}
                   className="form-field"
                 />
             </Col>
@@ -160,8 +146,8 @@ function CustomDialog({ isOpen, selectedUser, closePopup, isEdit = false, onSave
                 type="text"
                 placeholder="john.doe@gmail.com"
                 name="email"
-                value={formData?.email || ""}
-                  onChange={handleUserForm}
+                value={formData?.email ? formData?.email : ""}
+                  onChange={(event) => handleUserForm(event)}
                   className="form-field"
                 />
             </Col>
@@ -171,8 +157,8 @@ function CustomDialog({ isOpen, selectedUser, closePopup, isEdit = false, onSave
                 type="text"
                 placeholder="+919087654321"
                 name="phone"
-                value={formData?.phone || ""}
-                onChange={handleUserForm}
+                value={formData?.phone ? formData?.phone : ""}
+                onChange={(event) => handleUserForm(event)}
                 className="form-field"
                 />
             </Col>
@@ -182,8 +168,8 @@ function CustomDialog({ isOpen, selectedUser, closePopup, isEdit = false, onSave
                 type="date"
                 placeholder="Doe"
                 name="dob"
-                value={formData?.dob || ""}
-                  onChange={handleUserForm}
+                value={formData?.dob ? formData?.dob : Date()}
+                  onChange={(event) => handleUserForm(event)}
                   className="form-field"
                 />
             </Col>
@@ -193,8 +179,8 @@ function CustomDialog({ isOpen, selectedUser, closePopup, isEdit = false, onSave
                   type="text"
                   placeholder="123 Main Street, Anytown, CA 91234"
                   name="address"
-                  value={formData?.address || ""}
-                  onChange={handleUserForm}
+                  value={formData?.address ? formData?.address : ""}
+                  onChange={(event) => handleUserForm(event)}
                   className="form-field"
                 />
             </Col>

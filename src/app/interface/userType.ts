@@ -7,4 +7,10 @@ export interface UserType {
   address?: string;
   dob?: string;
   status: string;
+  role: string
+}
+
+export interface UserLogin {
+  username: string;
+  password: string;
 }

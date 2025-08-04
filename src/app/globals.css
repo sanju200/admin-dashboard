@@ -39,7 +39,7 @@ body {
   margin: 0.5rem 0;
 }
 .table-title{
-  font-size: 1.25rem;
+  font-size: 1.25 rem;
   margin: 1rem;
   font-weight: 500;
 }
@@ -64,4 +64,16 @@ hr{
 .badge-danger{
   color: #b91c1c !important;
   background: #fee2e2;
+}
+.text-small{
+  font-size: 14px;
+}
+.custom-overlay{
+  top: 4rem;
+  background-color: #ffffff;
+  padding: 1rem;
+  right: 1rem;
+  width: 18rem;
+  border-radius: 0.5rem;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }

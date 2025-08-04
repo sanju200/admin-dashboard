@@ -3,12 +3,11 @@ import React, { Children, useState } from "react";
 import { styled, useTheme } from "@mui/material/styles";
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import {
+  Avatar,
   Box,
-  CssBaseline,
   Divider,
   IconButton,
   List,
-  Toolbar,
   Typography,
 } from "@mui/material";
 import Drawer from "@mui/material/Drawer";
@@ -22,16 +21,15 @@ import PeopleIcon from "@mui/icons-material/People";
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import SettingsIcon from "@mui/icons-material/Settings";
-import Header from "./header";
 import Dashboard from "./dashboard";
-import Link from "next/dist/client/link";
-import { useRouter } from "next/navigation";
-import PropTypes from 'prop-types';
-import Navbar from "./navbar";
+import PropTypes from "prop-types";
 import About from "../about/page";
 import Productdata from "../productdata/page";
 import Users from "../users/page";
 import Setting from "../setting/page";
+import { Button, Col, Row } from "react-bootstrap";
+import Link from "next/link";
+import { clearUser } from "../services/users";
 
 const drawerWidth = 240;
 const Main = styled("main", {
@@ -94,13 +92,10 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   justifyContent: "flex-end",
 }));
 
-function Layout(props: { window?: any; children?: any; }) {
-  const { window } = props;
-  const { children } = props;
-  const theme = useTheme();
+function Layout(props: { window?: any; children?: any }) {
   const [open, setOpen] = React.useState(true);
-  const router = useRouter();
-  const[activeComponent, setActiveComponent] = useState('/')
+  const [activeComponent, setActiveComponent] = useState("/");
+  const [userProfile, setUserProfile] = useState(false);
   const menuItem = [
     { title: "Dashboard", icon: <AvTimerIcon />, url: "/" },
     { title: "Users", icon: <PeopleIcon />, url: "/users" },
@@ -109,21 +104,28 @@ function Layout(props: { window?: any; children?: any; }) {
     { title: "About", icon: <InfoOutlineIcon />, url: "/about" },
   ];
 
+
   const renderContent = () => {
-    switch(activeComponent){
-      case '/':
+    switch (activeComponent) {
+      case "/":
         return <Dashboard />;
-      case '/setting':
+      case "/setting":
         return <Setting />;
-      case '/about':
-        return <About />
-      case '/productdata':
-        return <Productdata />
-      case '/users':
-        return <Users />
+      case "/about":
+        return <About />;
+      case "/productdata":
+        return <Productdata />;
+      case "/users":
+        return <Users />;
       default:
         return <Dashboard />;
     }
+  };
+
+  function stringAvatar(name: string) {
+    return {
+      children: `${name.split(" ")[0][0]}${name.split(" ")[1][0]}`,
+    };
   }
 
   const handleDrawerOpen = () => {
@@ -133,35 +135,108 @@ function Layout(props: { window?: any; children?: any; }) {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  const handleUserProfile = () => {
+    setUserProfile(true);
+    console.log('userProfile ', userProfile);
+  }
+
+  const handleURLChange = (url: string) => {
+    console.log('Active Url ', url);
+    // setActiveUrl(url);
+  }
+
+  const handleLocalStorage = () => {
+    clearUser();
+  }
+
   return (
-   <>
-     <div>
+  <>
+    <div>
       <Box sx={{ display: "flex" }}>
         {/* <CssBaseline /> */}
         <AppBar position="fixed" open={open} color="default">
-          <Toolbar>
-            <IconButton
-              aria-label="open drawer"
-              onClick={handleDrawerOpen}
-              edge="start"
-              sx={[
+          <Row className="p-3">
+            <Col xs={6} className="d-flex align-items-center">
+              <IconButton
+                aria-label="open drawer"
+                onClick={handleDrawerOpen}
+                edge="start"
+                sx={[
+                  {
+                    mr: 2,
+                  },
+                  open && { display: "none" },
+                ]}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Typography
+                variant="h6"
+                noWrap
+                component="div"
+                className="text-black"
+              >
+                Sample admin Project
+              </Typography>
+            </Col>
+            <Col xs={6}>
+              <div className="d-flex align-items-center float-end">
+                <Avatar
+                  sx={{
+                    backgroundColor: "#bae6ff",
+                    color: "#000000",
+                    width: 20,
+                    height: 20,
+                    padding: "18px",
+                    fontSize: "14px",
+                  }}
+                  {...stringAvatar("Kent Dodds")}
+                />
+                <Typography
+                  variant="h6"
+                  noWrap
+                  component="div"
+                >
+                  <Button variant="outline-light" className="text-black" onClick={handleUserProfile}>Kent Dodds</Button>
+                  
+                </Typography>
                 {
-                  mr: 2,
-                },
-                open && { display: "none" },
-              ]}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography
-              variant="h6"
-              noWrap
-              component="div"
-              className="text-black"
-            >
-              Mantis
-            </Typography>
-          </Toolbar>
+                    userProfile && (
+                    <div className="custom-overlay position-absolute">
+                      <div className="d-flex align-items-center">
+                        <Avatar
+                        sx={{
+                          backgroundColor: "#bae6ff",
+                          color: "#000000",
+                          width: 20,
+                          height: 20,
+                          padding: "18px",
+                          fontSize: "16px",
+                        }}
+                        {...stringAvatar("Kent Dodds")}
+                      /> 
+                        <div className="ms-3">
+                          <div className="fs-6 mb-0">Kent Dodds</div>
+                          <div className="text-small mt-0">kent.dodds@example.com</div>
+                        </div>   
+                      </div>
+                      <div className="text-center mt-3 mb-2 text-primary ">
+                          Profile
+                      </div>
+                      <Divider className="mb-3" />
+                      <div className="ms-3">
+                        <div className="m-2 hover:text-primary">View Profile</div>
+                        {/* <div className="m-2">Logout</div> */}
+                        <Link href="/login" onClick={handleLocalStorage}>Logout</Link>
+                      </div>
+                    </div>
+                    )
+                  }
+                
+              </div>
+            </Col>
+          </Row>
         </AppBar>
         <Drawer
           sx={{
@@ -178,7 +253,6 @@ function Layout(props: { window?: any; children?: any; }) {
         >
           <div className="flex items-center justify-center">
             <DrawerHeader>
-              {/* <img src='./app/assets/logo/logo-dark.svg' alt="app-logo" /> */}
               <h5 className="m-1 font-semibold"> Mantis </h5>
               <IconButton onClick={handleDrawerClose}>
                 <MenuIcon />
@@ -199,19 +273,18 @@ function Layout(props: { window?: any; children?: any; }) {
         </Drawer>
         <Main open={open}>
           <DrawerHeader />
-          <div>
-            {renderContent()}
-          </div>
+          <div>{renderContent()}</div>
         </Main>
       </Box>
     </div>
-   </>
+  </>
+    
   );
 }
 
 Layout.propTypes = {
   window: PropTypes.func,
-  Children: PropTypes.array
-}
+  Children: PropTypes.array,
+};
 
 export default Layout;

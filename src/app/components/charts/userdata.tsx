@@ -59,7 +59,7 @@ function Userdata() {
     yAxis: { type: "value" },
     series: [
       {
-        name: "Avg Rating",
+        name: "Average Rating",
         type: "bar",
         barWidth: "60%",
         data: ratings,

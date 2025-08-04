@@ -25,7 +25,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { red } from "@mui/material/colors";
-import { getUserData } from "../services/users";
+import { deleteSelectedUser, getUserData } from "../services/users";
 import { Button, Col, Row } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import ConfirmationPopup from "../components/confirmationPopup";
@@ -214,7 +214,7 @@ function Users() {
   const [userList, setUserList] = useState<UserType[]>([]);
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<keyof UserType>("_id");
-  const [selected, setSelected] = React.useState<readonly string[]>([]);
+  const [selected, setSelected] = React.useState<string[]>([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowPerPage, setRowPerPage] = React.useState(5);
@@ -239,22 +239,16 @@ function Users() {
   };
 
   const deleteUser = async (user : UserType) => {
-    try{
-      const response = await fetch(`http://localhost:3002/users/${user._id}`, {
-        method: 'DELETE',
-         headers: {
-            "Content-Type": "application/json",
-          }
-      })
-      if(response.ok){
-        setOpenDeleteUserPopup(false);
-      }else{
-        const errorText = await response.text();
-      }
+    const response = await deleteSelectedUser(user?._id);
+    if(response){
+      setOpenDeleteUserPopup(false);
+      alert('User deleted successfully');
       fetchData();
-    }catch(err){
-      console.error('Failed to delete user: ', err)
+    }else{
+      alert('Failed to delete the user');
+      setOpenDeleteUserPopup(false);
     }
+
   }
   
   const deleteActionButton = {
@@ -330,7 +324,7 @@ function Users() {
   // };
 
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowPerPage - userList.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowPerPage - userList?.length) : 0;
 
 
   const visibleRows: UserType[] = React.useMemo(
@@ -382,7 +376,7 @@ function Users() {
             />
             <TableBody>
               { visibleRows && visibleRows.map((row, index) => {
-                const isItemSelected = selected.includes(row?._id);
+                const isItemSelected = selected.includes(row._id);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
@@ -407,9 +401,9 @@ function Users() {
                     </TableCell>
                     <TableCell>{row.firstname} { row.lastname}</TableCell>
                     <TableCell>{row.email}</TableCell>
-                    <TableCell>{row.phone}</TableCell>
-                    <TableCell>{row.address}</TableCell>
-                    <TableCell>{row.dob}</TableCell>
+                    <TableCell>{row?.phone ? row.phone : '-'}</TableCell>
+                    <TableCell>{row?.address ? row?.address : '-'}</TableCell>
+                    <TableCell>{row?.dob ? row?.dob : '-'}</TableCell>
                     <TableCell>{row.status}</TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <VisibilityIcon fontSize="small" color="primary" className="icon m-1 border-primary" onClick={() => openViewUserPopup(row)} />  
